@@ -334,10 +334,11 @@ Deployed a user-friendly web application to make the model easily accessible. Us
 - Containerized the application combining the `FastAPI` backend and `Gradio` frontend in a single `Docker` container for reliable and portable deployment.  
 - The provided `Dockerfile` defines the Python environment, installs dependencies, and launches both backend and frontend with the `start.sh` shell script.
 
-**Hosting on Hugging Face**
-- Serialized the ML pipeline using `joblib` and uploaded it to [Hugging Face Hub](https://huggingface.co/JensBender/loan-default-prediction-pipeline) for versioning and reuse.
-- Hosted the Dockerized app on [Hugging Face Spaces](https://huggingface.co/spaces/JensBender/loan-default-prediction-app) to offer a live, interactive demo for end users.
-- Utilized GitHub Actions for continuous deployment by syncing application-related files from the GitHub repository with the Hugging Face Spaces repository.
+**Deployment (Planned / Deployment-Ready)**
+- The project includes a fully Dockerized FastAPI + Gradio application prepared for hosting.
+- The ML pipeline is structured for easy upload to a model registry (Hugging Face Hub or AWS S3).
+- A live demo deployment will be added under my own account in a future iteration.
+- Code for containerization, API serving, and UI integration remains fully included in this repository.
 
 ![Web App](images/web_app.png)
 
@@ -383,10 +384,6 @@ The web app requires a MaxMind license key to download the GeoLite2 Country data
 ## ▶️ Usage
 You can interact with the model pipeline via the web app, the API, or by downloading the pipeline for local inference.
 
-### Web App
-**On Hugging Face**  
-The easiest way to use the model is through the web app on [Hugging Face Spaces](https://huggingface.co/spaces/JensBender/loan-default-prediction-app). You can interact with the model directly through the web interface without any installation or coding required.
-
 **Run Locally**  
 To run the web app on your local machine:
 1. Create and activate a virtual environment (recommended):
@@ -422,10 +419,9 @@ Alternatively, you can run the web app in a Docker container to match the produc
 3. Access the app: Open [http://127.0.0.1:7860](http://127.0.0.1:7860) in your browser.
 
 ### API
-The REST API allows for programmatic access and integration into other systems. It is available both on the Hugging Face Space and when running locally.
+The REST API allows programmatic access and integration into other systems. It is available when running locally (FastAPI) and is deployment-ready.
 
-Example API usage with Python's `requests` library:
-
+Example API usage with Python's `requests` library (local):
 ```python
 import requests 
 
@@ -444,47 +440,34 @@ applicant_data = {
     "current_house_yrs": 11,
 }
 
-# API request to FastAPI predict endpoint 
-# On Hugging Face Spaces
-prediction_api_url = "https://jensbender-loan-default-prediction-app.hf.space/api/predict"
-# On local machine (uncomment when running locally)
-# prediction_api_url = "http://127.0.0.1:7860/api/predict"  
+# Local FastAPI predict endpoint (run the app locally first)
+prediction_api_url = "http://127.0.0.1:7860/api/predict"
 
 # Send request
 response = requests.post(prediction_api_url, json=applicant_data)
-
-# Check if request was successful
 response.raise_for_status()
 
 # Extract prediction and probability of default
 prediction_response = response.json()
 prediction_result = prediction_response["results"][0]
 prediction = prediction_result["prediction"]
-default_probability = prediction_result["probabilities"]["Default"]
+default_probability = prediction_result["probabilities"].get("Default", None)
 
-# Show results
 print(f"Probability of default: {default_probability * 100:.1f}% (threshold: 29.0%)")
 print(f"Prediction: {prediction}")
 ```
 
-### Model Pipeline
-To use the pipeline directly for local inference, you can download the serialized `joblib` pipeline using the `huggingface_hub` library.  
-**Note:** Unlike the API, which handles data conversion and thresholding automatically, the pipeline requires a `pandas DataFrame` input and returns raw probabilities. You must manually apply the optimized decision threshold to obtain a prediction. 
+### Model Pipeline (Local)
+To use the pipeline directly for local inference, load the serialized `joblib` pipeline from the repository or from a local file. The pipeline requires a `pandas.DataFrame` input and returns raw probabilities — apply the optimized decision threshold to obtain a classification.
 
 ```python
-from huggingface_hub import hf_hub_download
 import joblib
 import pandas as pd
 
-# Download the pipeline from Hugging Face Hub and load it into memory
-pipeline_path = hf_hub_download(
-  "JensBender/loan-default-prediction-pipeline",
-  "loan_default_rf_pipeline.joblib"
-)
-pipeline = joblib.load(pipeline_path)
+# Load the pipeline (example: ./models/loan_default_rf_pipeline.joblib)
+pipeline = joblib.load("models/loan_default_rf_pipeline.joblib")
 
-# Create a sample DataFrame
-# Note: The column names and data types must match the training data
+# Create a sample DataFrame (columns must match training data)
 applicant_data = pd.DataFrame({
     "income": [300000],
     "age": [30],
@@ -499,16 +482,15 @@ applicant_data = pd.DataFrame({
     "current_house_yrs": [11],
 })
 
-# Get predicted probabilities 
-probabilities = pipeline.predict_proba(applicant_data)  # np.ndarray containing both classes (0: no default, 1: default)
-default_probability = probabilities[0, 1]  # row 0, column 1 
+# Get predicted probabilities
+probabilities = pipeline.predict_proba(applicant_data)
+default_probability = probabilities[0, 1]  # class 1 probability
 
-# Apply optimized threshold to make a classification decision
+# Apply optimized threshold to make a decision
 threshold = 0.29
 prediction = "Default" if default_probability >= threshold else "No Default"
 
-# Show results
-print(f"Probability of default: {default_probability * 100:.1f}% (threshold: 29.0%)")
+print(f"Probability of default: {default_probability * 100:.1f}% (threshold: {threshold*100:.1f}%)")
 print(f"Prediction: {prediction}")
 ```
 
@@ -591,25 +573,12 @@ The model was trained on historical data that may carry biases related to socioe
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-
-<!-- LICENSE -->
-## ©️ License
-Summary of license terms for all project components:
-| Component | Description | Hosted on | License |
-| :--- | :------ | :------ | :------ |
-| Source Code | Full project repository with training, evaluation, and deployment scripts | [GitHub](https://github.com/JensBender/loan-default-prediction) | [MIT](LICENSE) |
-| Model Pipeline | Pre-trained `scikit-learn` pipeline with Random Forest Classifier and preprocessing | [Hugging Face Hub](https://huggingface.co/JensBender/loan-default-prediction-pipeline) | [Apache-2.0](https://huggingface.co/JensBender/loan-default-prediction-pipeline/resolve/main/LICENSE) |
-| Web App | Live, interactive demo with Gradio frontend and FastAPI backend | [Hugging Face Spaces](https://huggingface.co/spaces/JensBender/loan-default-prediction-app) | [MIT](https://huggingface.co/spaces/JensBender/loan-default-prediction-app/resolve/main/LICENSE) |
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
 <!-- CREDITS -->
 ## 👏 Credits
 This project was made possible with the help of the following resources:
 - **Dataset**: The model is trained on the "Loan Prediction Based on Customer Behavior" dataset by Subham Jain, available on [Kaggle](https://www.kaggle.com/datasets/subhamjain/loan-prediction-based-on-customer-behavior).
 - **Header image**: Generated using the FLUX.1 [dev] image generator via [Hugging Face](https://huggingface.co/spaces/black-forest-labs/FLUX.1-dev) by [Black Forest Labs](https://blackforestlabs.ai/).
-- **Geolocation logging in web app**: The FastAPI backend uses the GeoLite2 Country database by [MaxMind](https://www.maxmind.com) to log country-level geolocation for model monitoring.
+- - **Geolocation (optional component)**: The project includes optional support for using the GeoLite2 Country database by MaxMind for geolocation-based logging. This feature remains included in the codebase for future deployment use.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
