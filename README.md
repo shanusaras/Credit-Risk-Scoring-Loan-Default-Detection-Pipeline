@@ -339,25 +339,21 @@ This repository is structured to support production deployment. The codebase inc
 - `Dockerfile` and `start.sh` provided to run the backend + frontend together.
 - Local run instructions are included in Getting Started.
 
-![Web App](images/web_app.png)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
 <!-- TESTING -->
 ## 🕵 Testing
-Developed comprehensive unit, integration, and end-to-end tests using `pytest`.
-- **Unit Tests** (`tests/unit/`): Validate individual components in isolation.
-  - Custom Transformers: Tested each transformer in `src/custom_transformers.py` to ensure correct data transformation, scikit-learn compatibility, and proper error handling for invalid inputs.
-  - Pydantic Schemas: Validated the data models in `backend/schemas.py` to confirm that type constraints, enums, value ranges, and custom validators for API requests and responses work as expected.
-  - Helper Functions: Verified that the internal functions in `backend/app.py` (e.g., load pipeline) and `frontend/app.py` (e.g., format input) perform their intended tasks.
-- **Integration Tests** (`tests/integration/`): Verify that different components of the application work together.
-  - ML Pipeline: Tested the interactions between custom transformers within pipeline segments (e.g., feature engineering, missing value handling) and the complete data preprocessing and model pipeline defined in `src/pipeline.py`.
-  - FastAPI Backend: Verified the `/predict` endpoint behavior with single and batch predictions, including input validation, error handling (e.g., HTTP 422, 500), and expected responses for various inputs.
-  - Frontend-Backend Integration: Tested the communication between the Gradio frontend and the FastAPI backend to ensure data is sent and received correctly.
-- **End-to-End (E2E) Tests** (`tests/e2e/`): Simulate real user journeys.
-  - Utilized `Selenium` to automate browser interactions with the Gradio UI, including filling out the loan application form and submitting it.
-  - Tested both "happy path" scenarios with valid inputs and error scenarios with invalid or missing inputs to ensure the UI displays the correct predictions or error messages.
+
+This repository includes example test suites and test templates implemented with `pytest` to demonstrate how unit, integration, and end-to-end tests can be organised for the ML pipeline and web app. The tests cover:
+
+- **Unit test templates** (`tests/unit/`) for individual components (e.g., custom transformers, helper functions, Pydantic schemas).
+- **Integration test templates** (`tests/integration/`) that show how to validate interactions between pipeline components and API endpoints (these require the local app or mocked endpoints to run).
+- **End-to-end (E2E) test templates** (`tests/e2e/`) illustrating browser automation scenarios (Selenium) for the UI; these are provided as examples and require a running app and browser driver.
+
+> **Note:** The test files are included as runnable templates / examples. They demonstrate the intended testing strategy and can be executed locally once the environment and service are started.
+
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -523,7 +519,7 @@ The model was trained on historical data that may carry biases related to socioe
 ```
 ├── .github/              # GitHub Actions workflows
 │   └── workflows/
-│       └── deploy-to-hf.yml # Deploys the web app to Hugging Face Spaces
+│       └── deploy-to-hf.yml # CI/CD template (requires repository secrets to publish; included for reproducibility).
 │
 ├── backend/              # Contains the FastAPI application
 │   ├── __init__.py
