@@ -227,14 +227,17 @@ fastapi_app = FastAPI(title="Loan Default Prediction API")
 
 # Prediction endpoint 
 @fastapi_app.post("/api/predict", response_model=PredictionResponse)
-def predict(pipeline_input: PipelineInput | list[PipelineInput], request: Request) -> PredictionResponse:  # JSON object -> PipelineInput | JSON array -> list[PipelineInput]
-    batch_metadata = None   
+def predict(pipeline_input: PipelineInput | list[PipelineInput], request: Request) -> PredictionResponse:
+    batch_metadata = None
     pipeline_input_dict_ls = None
     try:
-            # Guard: pipeline must be loaded before serving predictions
+        # Guard: pipeline must be loaded before serving predictions
         if pipeline is None:
-        logger.error("Prediction requested but pipeline is not loaded. Model file not present.")
-        raise HTTPException(status_code=503, detail="Model not loaded. The repository is deployment-ready but the serialized pipeline file is not present.")
+            logger.error("Prediction requested but pipeline is not loaded. Model file not present.")
+            raise HTTPException(
+                status_code=503,
+                detail="Model not loaded. The repository is deployment-ready but the serialized pipeline file is not present."
+            )
 
         # Standardize input
         if isinstance(pipeline_input, list):
@@ -243,6 +246,7 @@ def predict(pipeline_input: PipelineInput | list[PipelineInput], request: Reques
             pipeline_input_dict_ls = [input.model_dump() for input in pipeline_input]
         else:  # isinstance(pipeline_input, PipelineInput)
             pipeline_input_dict_ls = [pipeline_input.model_dump()]
+
         
         # Get batch metadata for logging
         batch_metadata = get_batch_metadata(pipeline_input_dict_ls, request, geoip_reader)
