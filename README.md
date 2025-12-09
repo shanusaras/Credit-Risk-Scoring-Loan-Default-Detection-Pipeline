@@ -5,7 +5,7 @@
 <img src="images/header-image.webp">
 
 <!-- SHORT SUMMARY  -->
-Developed a machine learning pipeline for loan default prediction to support credit risk assessment. Engineered, scaled, and encoded features. Trained, tuned, and evaluated eight models. Deployed a Random Forest Classifier with an optimized decision threshold (AUC-PR: 0.59, recall: 0.79 for defaulters) as a Dockerized web app with a FastAPI backend and Gradio frontend, hosted on Hugging Face Spaces.
+Developed an end-to-end machine learning pipeline for loan default prediction to support credit risk assessment. Engineered, scaled, and encoded features, trained and tuned multiple models, and prepared the codebase for production deployment. The repository includes a Dockerized FastAPI + Gradio deployment stack and deployment instructions — the app is **deployment-ready** (not currently hosted live).
 
 ---
 
@@ -89,7 +89,7 @@ Built an end-to-end machine learning solution for predicting loan defaults using
 - **Data Preprocessing**: Engineered new features (e.g., job stability, city tier, state default rate), handled duplicates, data types, missing values, and outliers, scaled numerical features, and encoded categorical features.
 - **Exploratory Data Analysis**: Analyzed distributions and relationships using descriptive statistics, correlations, and visualizations.
 - **Modeling**: Trained and evaluated eight baseline models (e.g., Logistic Regression, Random Forest, XGBoost) and tuned hyperparameters. Selected a Random Forest Classifier with an optimized decision threshold, achieving an AUC-PR of 0.59, recall of 0.79, and precision of 0.51 for the default class on the hold-out test set. Visualized feature importances and showed model prediction examples.
-- **Deployment**: Served the full machine learning pipeline (preprocessing and model) as a web app using a FastAPI backend and Gradio frontend within a single Docker container, hosted on Hugging Face Spaces.
+- **Deployment (status)**: The repository contains a Dockerized FastAPI + Gradio deployment stack and scripts to host the app (e.g., on Hugging Face Spaces). The app is **deployment-ready** and can be launched locally or hosted; a live demo will be posted in a future iteration.
 - **Testing**: Implemented comprehensive unit, integration, and end-to-end tests to validate individual components, their interactions, and entire user journeys.
 
 
@@ -318,27 +318,26 @@ The table below illustrates model performance on test data by highlighting best 
 
 
 <!-- DEPLOYMENT -->
-## 🚀 Deployment
-Deployed a user-friendly web application to make the model easily accessible. Used `scikit-learn` to built the end-to-end ML pipeline, including all data preprocessing steps and the final Random Forest model. The ML pipeline was then wrapped into a web app using `FastAPI` backend and `Gradio` frontend, containerized with `Docker`, and hosted on Hugging Face.
+## 🚀 Deployment (deployment-ready)
 
-**FastAPI Backend**  
-- Served the ML pipeline via a RESTful API built with `FastAPI`, supporting both single and batch requests.  
-- Implemented data validation using `Pydantic` models, including required and optional fields, type constraints, enums for categorical fields, value range constraints for numerical fields, and custom validation logic. 
-- The `/predict` endpoint accepts loan application data in JSON format, processes it through the ML pipeline, and returns predictions ("default" or "no default") along with probability scores.
+This repository is structured to support production deployment. The codebase includes:
+- a FastAPI backend that exposes a `/predict` endpoint,
+- a Gradio frontend to demo the model,
+- a `Dockerfile` and `start.sh` scripts for containerized local runs,
+- CI/CD workflow templates and an upload script to push artifacts to model hubs.
 
-**Gradio Frontend**   
-- Built a user-friendly interface with `Gradio` so users can enter applicant information through a simple form.  
-- Sends submissions to the FastAPI backend, which returns predictions rendered directly in the UI.
+> **Status:** The deployment stack and scripts are included and tested locally; the live demo is not currently hosted publicly. The repository is deployment-ready and can be hosted on platforms such as Hugging Face Spaces, Streamlit Cloud, or a cloud VM. A hosted demo will be added in a future iteration.
 
-**Docker**  
-- Containerized the application combining the `FastAPI` backend and `Gradio` frontend in a single `Docker` container for reliable and portable deployment.  
-- The provided `Dockerfile` defines the Python environment, installs dependencies, and launches both backend and frontend with the `start.sh` shell script.
+**FastAPI Backend (what's included)**  
+- RESTful API skeleton with a `/predict` endpoint that accepts JSON applicant data and returns probability and label.
+- Pydantic models for input validation and schema enforcement.
 
-**Deployment (Planned / Deployment-Ready)**
-- The project includes a fully Dockerized FastAPI + Gradio application prepared for hosting.
-- The ML pipeline is structured for easy upload to a model registry (Hugging Face Hub or AWS S3).
-- A live demo deployment will be added under my own account in a future iteration.
-- Code for containerization, API serving, and UI integration remains fully included in this repository.
+**Gradio Frontend (what's included)**  
+- Lightweight UI that calls the API and displays results. Useful for local demos and user testing.
+
+**Docker & Local run**  
+- `Dockerfile` and `start.sh` provided to run the backend + frontend together.
+- Local run instructions are included in Getting Started.
 
 ![Web App](images/web_app.png)
 
