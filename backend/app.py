@@ -203,13 +203,18 @@ except FileNotFoundError:
     geoip_reader = None
 
 # --- ML Pipeline ---
-# Load loan default prediction pipeline (including data preprocessing and Random Forest Classifier model) from Hugging Face Hub
+
+# NOTE: For this repository copy the serialized pipeline is NOT published.
+# The app is deployment-ready, but the pipeline file is not included/published.
 PIPELINE_VERSION_TAG = "v1.0"
-pipeline = load_pipeline_from_huggingface(
-    repo_id="JensBender/loan-default-prediction-pipeline", 
-    filename="loan_default_rf_pipeline.joblib",
-    revision=PIPELINE_VERSION_TAG  
-)
+pipeline = None  # Pipeline is not loaded by default in this repo copy.
+
+# If you want to run the app locally with the model, place the pipeline file at:
+# models/loan_default_rf_pipeline.joblib
+# Then uncomment and use:
+# root_dir = get_root_directory()
+# pipeline_path = root_dir / "models" / "loan_default_rf_pipeline.joblib"
+# pipeline = load_pipeline_from_local(pipeline_path)
 
 # Load pipeline from local machine (use for local setup without Hugging Face Hub)
 # root_dir = get_root_directory()  # get path to root directory
