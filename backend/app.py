@@ -231,6 +231,11 @@ def predict(pipeline_input: PipelineInput | list[PipelineInput], request: Reques
     batch_metadata = None   
     pipeline_input_dict_ls = None
     try:
+            # Guard: pipeline must be loaded before serving predictions
+        if pipeline is None:
+        logger.error("Prediction requested but pipeline is not loaded. Model file not present.")
+        raise HTTPException(status_code=503, detail="Model not loaded. The repository is deployment-ready but the serialized pipeline file is not present.")
+
         # Standardize input
         if isinstance(pipeline_input, list):
             if pipeline_input == []:  # handle empty batch input
